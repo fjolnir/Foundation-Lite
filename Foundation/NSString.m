@@ -2,20 +2,6 @@
 #import <CoreFoundation/CFString.h>
 #import <dispatch/dispatch.h>
 
-enum {	// Legal level values for CFLog()
-    kCFLogLevelEmergency = 0,
-    kCFLogLevelAlert = 1,
-    kCFLogLevelCritical = 2,
-    kCFLogLevelError = 3,
-    kCFLogLevelWarning = 4,
-    kCFLogLevelNotice = 5,
-    kCFLogLevelInfo = 6,
-    kCFLogLevelDebug = 7,
-};
-
-CF_EXPORT void CFLog(int32_t level, CFStringRef format, ...);
-
-
 CF_EXPORT void _CFStringAppendFormatAndArgumentsAux(CFMutableStringRef outputString, CFStringRef (*copyDescFunc)(void *, const void *loc), CFDictionaryRef formatOptions, CFStringRef formatString, va_list args);
 CF_EXPORT CFStringRef  _CFStringCreateWithFormatAndArgumentsAux(CFAllocatorRef alloc, CFStringRef (*copyDescFunc)(void *, const void *loc), CFDictionaryRef formatOptions, CFStringRef format, va_list arguments);
 
