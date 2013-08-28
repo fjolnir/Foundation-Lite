@@ -82,8 +82,6 @@ typedef NS_OPTIONS(NSUInteger, NSStringEncodingConversionOptions) {
 - (double)doubleValue;
 - (float)floatValue;
 - (int)intValue;
-- (NSInteger)integerValue;
-- (long long)longLongValue;
 - (BOOL)boolValue;
 
 - (NSArray *)componentsSeparatedByString:(NSString *)separator;

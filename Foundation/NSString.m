@@ -8,7 +8,7 @@ CF_EXPORT CFStringRef  _CFStringCreateWithFormatAndArgumentsAux(CFAllocatorRef a
 
 @interface NSString ()
 + (id)_realAlloc;
-- (CFStringRef)CFStringRef;
+- (CFStringRef)CFString;
 @end
 
 
@@ -33,7 +33,7 @@ CF_EXPORT CFStringRef  _CFStringCreateWithFormatAndArgumentsAux(CFAllocatorRef a
 
 static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
 {
-    return CFStringCreateCopy(NULL, [[(id)aObj description] CFStringRef]);
+    return CFStringCreateCopy(NULL, [[(id)aObj description] CFString]);
 }
 
 @implementation NSCFString
@@ -110,7 +110,7 @@ static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
 }
 - (id)initWithFormat:(NSString *)aFormat arguments:(va_list)aArgList
 {
-    CFStringRef cfStr = _CFStringCreateWithFormatAndArgumentsAux(NULL, &_copyObjectDescription, NULL, [aFormat CFStringRef], aArgList);
+    CFStringRef cfStr = _CFStringCreateWithFormatAndArgumentsAux(NULL, &_copyObjectDescription, NULL, [aFormat CFString], aArgList);
     self = [self initWithCFString:cfStr];
 
     CFRelease(cfStr);
@@ -143,7 +143,12 @@ static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
     [super dealloc];
 }
 
-- (CFStringRef)CFStringRef
+- (id)copy
+{
+    return [self retain];
+}
+
+- (CFStringRef)CFString
 {
     return _cfStr;
 }
@@ -178,9 +183,111 @@ static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
     return CFStringGetCharacterAtIndex(_cfStr, aIdx);
 }
 
-- (id)copy
+- (NSString *)substringFromIndex:(NSUInteger const)aFrom
 {
-    return [self retain];
+    return [self substringWithRange:(NSRange) { aFrom, [self length] - aFrom }];
+}
+- (NSString *)substringToIndex:(NSUInteger const)aTo;
+{
+    return [self substringWithRange:(NSRange) { 0, aTo }];
+}
+- (NSString *)substringWithRange:(NSRange const)aRange;
+{
+    CFStringRef substring = CFStringCreateWithSubstring(NULL, _cfStr, *(CFRange *)&aRange);
+    NSCFString *result =  [[[NSCFString alloc] initWithCFString:substring] autorelease];
+    CFRelease(substring);
+    return result;
+}
+
+
+- (NSComparisonResult)compare:(NSString *)aString
+{
+    return (NSComparisonResult)CFStringCompare(_cfStr, [aString CFString], 0);
+}
+- (NSComparisonResult)caseInsensitiveCompare:(NSString *)aString
+{
+    return (NSComparisonResult)CFStringCompare(_cfStr, [aString CFString], kCFCompareCaseInsensitive);
+}
+- (BOOL)isEqualToString:(NSString *)aString
+{
+    return [self compare:aString] == NSOrderedSame;
+}
+- (BOOL)isEqual:(id)aObj
+{
+    return [aObj isKindOfClass:[NSString class]] && [self isEqualToString:aObj];
+}
+
+
+- (NSRange)rangeOfString:(NSString *)aString
+{
+    CFRange const range = CFStringFind(_cfStr, [aString CFString], 0);
+    return *(NSRange *)&range;
+}
+- (NSString *)stringByAppendingString:(NSString *)aString
+{
+    CFArrayRef strings = CFArrayCreate(NULL, (CFTypeRef[]) {
+        _cfStr, [aString CFString]
+    }, 2, &kCFTypeArrayCallBacks);
+    CFStringRef concatenated = CFStringCreateByCombiningStrings(NULL, strings, CFSTR(""));
+    NSCFString *result =  [[[NSCFString alloc] initWithCFString:concatenated] autorelease];
+    CFRelease(concatenated);
+    CFRelease(strings);
+
+    return result;
+}
+
+- (double)doubleValue
+{
+    return CFStringGetDoubleValue(_cfStr);
+}
+- (float)floatValue
+{
+    return [self doubleValue];
+}
+- (int)intValue
+{
+    return CFStringGetIntValue(_cfStr);
+}
+- (BOOL)boolValue
+{
+    if([self isEqualToString:@"YES"] || [self isEqualToString:@"true"])
+        return YES;
+    else
+        return [self intValue] != 0;
+}
+
+
+- (NSString *)uppercaseString
+{
+    CFMutableStringRef uppercase = CFStringCreateMutableCopy(NULL, 0, _cfStr);
+    CFStringUppercase(uppercase, NULL);
+    NSCFString *result =  [[[NSCFString alloc] initWithCFString:uppercase] autorelease];
+    CFRelease(uppercase);
+
+    return result;
+}
+- (NSString *)lowercaseString
+{
+    CFMutableStringRef lowercase = CFStringCreateMutableCopy(NULL, 0, _cfStr);
+    CFStringLowercase(lowercase, NULL);
+    NSCFString *result =  [[[NSCFString alloc] initWithCFString:lowercase] autorelease];
+    CFRelease(lowercase);
+
+    return result;
+}
+- (NSString *)capitalizedString
+{
+    CFMutableStringRef capitalized = CFStringCreateMutableCopy(NULL, 0, _cfStr);
+    CFStringCapitalize(capitalized, NULL);
+    NSCFString *result =  [[[NSCFString alloc] initWithCFString:capitalized] autorelease];
+    CFRelease(capitalized);
+
+    return result;
+}
+
+- (NSUInteger)hash
+{
+    return CFHash(_cfStr);
 }
 
 @end
@@ -222,29 +329,34 @@ static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
     return [NSCFString stringWithCString:aBuf encoding:aEncoding];
 }
 
-- (CFStringRef)CFStringRef
+- (CFStringRef)CFString
 {
     assert(0); // Abstract
+    return NULL;
 }
 
 - (NSUInteger)length
 {
     assert(0); // Abstract
+    return 0;
 }
 
 - (unichar)characterAtIndex:(NSUInteger)index
 {
     assert(0); // Abstract
+    return 0;
 }
 
 - (id)copy
 {
     assert(0); // Abstract
+    return nil;
 }
 
 - (id)mutableCopy
 {
     assert(0); // Abstract
+    return nil;
 }
 
 @end
@@ -265,9 +377,9 @@ static CFStringRef _copyObjectDescription(void * const aObj, const void *loc)
 //    return _realStr;
 }
 
-- (CFStringRef)CFStringRef
+- (CFStringRef)CFString
 {
-    return [[self _heapCopy] CFStringRef];
+    return [[self _heapCopy] CFString];
 }
 
 - (id)forwardingTargetForSelector:(SEL const)aSelector
