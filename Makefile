@@ -10,6 +10,7 @@ SRC       = test.m \
 
 SRC_NOARC = Foundation/NSObject.m \
             Foundation/NSAutoreleasePool.m \
+            Foundation/NSArray.m \
             Foundation/NSString.m
 
 OBJ       = $(addprefix build/, $(SRC:.m=.o))

@@ -22,6 +22,21 @@ int main()
 
         NSLog(@"Number: %@ Number as str: %@", @123, [@123.3 stringValue]);
 
+        NSLog(@"Concat: %@", [@"foo" stringByAppendingString:@"bar"]);
+
+        NSMutableString *mutableStr = [@"Doo" mutableCopy];
+        NSLog(@"Mutable String: %@", mutableStr);
+        [mutableStr appendFormat:@"bar"];
+        NSLog(@"                %@", mutableStr);
+        [mutableStr replaceCharactersInRange:(NSRange){0,1} withString:@"F"];
+        NSLog(@"                %@", mutableStr);
+
+        NSArray *array = @[@1, @2, @3];
+        NSLog(@"Array: %@ -> %@", array, array[1]);
+        for(id obj in array) {
+            NSLog(@" > %@", obj);
+        }
+        
         Test *test = [Test new];
         NSLog(@"Test class: %@ instance: %@", [Test class], test);
         [test performSelector:@selector(stringValue)];
