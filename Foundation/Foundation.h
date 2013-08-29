@@ -17,7 +17,7 @@
 //#import <Foundation/NSScanner.h>
 //#import <Foundation/NSSet.h>
 //#import <Foundation/NSURL.h>
-//#import <Foundation/NSError.h>
+#import <Foundation/NSError.h>
 //#import <Foundation/NSException.h>
 #import <Foundation/NSFastEnumeration.h>
 
