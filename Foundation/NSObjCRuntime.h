@@ -8,25 +8,24 @@
 #define FOUNDATION_IMPORT FOUNDATION_EXTERN
 
 #if !defined(NSMaxStackArguments)
-#    define NSMaxStackArguments 128
+#    define NSMaxStackArguments (128)
 #endif
 
 // Supplies `__objects` & `__count` to `code`
 #define NSWithIDArgs(firstArg, code...) do {                                                 \
     va_list __ap;                                                                            \
-    uint32_t __max = NSMaxStackArguments;                                                    \
     uint32_t __count = 0;                                                                    \
-    id  __buf[__max];                                                                        \
+    id  __buf[NSMaxStackArguments];                                                          \
     id *__objects = __buf;                                                                   \
     id __obj;                                                                                \
                                                                                              \
     __processIdArgs:                                                                         \
     va_start(__ap, firstArg);                                                                \
     __obj = firstArg;                                                                        \
-    while(__obj && __count < __max) {                                                        \
+    while(__obj && __count < NSMaxStackArguments) {                                          \
         __objects[__count] = __obj;                                                          \
         __obj = va_arg(__ap, id);                                                            \
-        if(++__count == __max) {                                                             \
+        if(++__count == NSMaxStackArguments) {                                               \
             /* Too many arguments to process on stack; exhaust arg list and move to heap */  \
             while(__obj) __obj = va_arg(__ap, id);                                           \
             va_end(__ap);                                                                    \
@@ -36,11 +35,37 @@
         }                                                                                    \
     }                                                                                        \
     va_end(__ap);                                                                            \
-    code;                                                                                    \
-    if(__count >= NSMaxStackArguments)                                                       \
-        free(__objects);                                                                     \
+    @try         { code;     }                                                               \
+    @catch(id e) { @throw e; }                                                               \
+    @finally {                                                                               \
+        if(__count >= NSMaxStackArguments)                                                   \
+            free(__objects);                                                                 \
+    }                                                                                        \
 } while(0)
 
+// Supplies __keys, __vals & __valCount
+#define NSWithIDKeyValArgs(firstArg, code...) NSWithIDArgs(firstArg,                         \
+    assert(__count%2 == 0);                                                                  \
+    NSUInteger __valCount = __count/2;                                                       \
+    id *__keys = (__valCount < NSMaxStackArguments/2) ? alloca(__valCount * sizeof(id))      \
+                                                      : malloc(__valCount * sizeof(id));     \
+    id *__vals = (__valCount < NSMaxStackArguments/2) ? alloca(__valCount * sizeof(id))      \
+                                                      : malloc(__valCount * sizeof(id));     \
+    for(NSUInteger i = 0, j = 0, k = 0; i < __count; ++i) {                                  \
+        if(i%2 == 0) /* Value */                                                             \
+            __vals[j++] = __objects[i];                                                      \
+        else /* Key */                                                                       \
+            __keys[k++] = __objects[i];                                                      \
+    }                                                                                        \
+    @try         { code;     }                                                               \
+    @catch(id e) { @throw e; }                                                               \
+    @finally {                                                                               \
+        if(__valCount >= NSMaxStackArguments/2) {                                            \
+            free(__keys);                                                                    \
+            free(__vals);                                                                    \
+        }                                                                                    \
+    }                                                                                        \
+)
 
 #if !defined(NS_INLINE)
     #if defined(__GNUC__)
