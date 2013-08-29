@@ -106,6 +106,13 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     return [self initWithObjects:copies count:count];
 }
 
+- (NSString *)description
+{
+    NSMutableString *desc = [@"(\n\t" mutableCopy];
+    [desc appendString:[self componentsJoinedByString:@",\n\t"]];
+    [desc appendString:@"\n)"];
+    return desc;
+}
 - (CFArrayRef)CFArray
 {
     return _cfArray;
@@ -175,10 +182,13 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 - (NSString *)componentsJoinedByString:(NSString *)aSeparator
 {
     NSMutableString *joined = [NSMutableString string];
+    BOOL first = YES;
     for(id obj in self) {
-        [joined appendString:[obj description]];
-        if(aSeparator)
+        if(!first && aSeparator)
             [joined appendString:aSeparator];
+        else
+            first = NO;
+        [joined appendString:[obj description]];
     }
     return joined;
 }

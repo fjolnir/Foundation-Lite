@@ -163,6 +163,11 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
     return [NSCFString alloc];
 }
 
++ (id)string
+{
+    return [[[self alloc] init] autorelease];
+}
+
 + (id)stringWithString:(NSString * const)aString;
 {
     return [[[self alloc] initWithString:aString] autorelease];
