@@ -6,7 +6,8 @@ LDFLAGS=-L/usr/local/lib -lobjc -lpthread -ldispatch -lCoreFoundation
 SRC       = test.m \
             Foundation/NSObjCRuntime.m \
             Foundation/NSNumber.m \
-            Foundation/NSException.m
+            Foundation/NSException.m \
+            Foundation/NSData.m \
 
 SRC_NOARC = Foundation/NSObject.m \
             Foundation/NSAutoreleasePool.m \

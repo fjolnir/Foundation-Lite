@@ -10,7 +10,7 @@
 //#import <Foundation/NSBundle.h>
 //#import <Foundation/NSCalendar.h>
 //#import <Foundation/NSCharacterSet.h>
-//#import <Foundation/NSData.h>
+#import <Foundation/NSData.h>
 //#import <Foundation/NSDate.h>
 //#import <Foundation/NSIndexPath.h>
 //#import <Foundation/NSRange.h>
