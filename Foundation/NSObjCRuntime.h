@@ -7,6 +7,41 @@
 #define FOUNDATION_EXPORT  FOUNDATION_EXTERN
 #define FOUNDATION_IMPORT FOUNDATION_EXTERN
 
+#if !defined(NSMaxStackArguments)
+#    define NSMaxStackArguments 128
+#endif
+
+// Supplies `__objects` & `__count` to `code`
+#define NSWithIDArgs(firstArg, code...) do {                                                 \
+    va_list __ap;                                                                            \
+    uint32_t __max = NSMaxStackArguments;                                                    \
+    uint32_t __count = 0;                                                                    \
+    id  __buf[__max];                                                                        \
+    id *__objects = __buf;                                                                   \
+    id __obj;                                                                                \
+                                                                                             \
+    __processIdArgs:                                                                         \
+    va_start(__ap, firstArg);                                                                \
+    __obj = firstArg;                                                                        \
+    while(__obj && __count < __max) {                                                        \
+        __objects[__count] = __obj;                                                          \
+        __obj = va_arg(__ap, id);                                                            \
+        if(++__count == __max) {                                                             \
+            /* Too many arguments to process on stack; exhaust arg list and move to heap */  \
+            while(__obj) __obj = va_arg(__ap, id);                                           \
+            va_end(__ap);                                                                    \
+            __objects = malloc(__count * sizeof(id));                                        \
+            __count = 0;                                                                     \
+            goto __processIdArgs;                                                            \
+        }                                                                                    \
+    }                                                                                        \
+    va_end(__ap);                                                                            \
+    code;                                                                                    \
+    if(__count >= NSMaxStackArguments)                                                       \
+        free(__objects);                                                                     \
+} while(0)
+
+
 #if !defined(NS_INLINE)
     #if defined(__GNUC__)
         #define NS_INLINE static __inline__ __attribute__((always_inline))
@@ -151,11 +186,6 @@
 #endif
 #endif
 
-
-#if !defined(NS_UNAVAILABLE)
-#define NS_UNAVAILABLE UNAVAILABLE_ATTRIBUTE
-#endif
-
 #if !defined(__unsafe_unretained)
 #define __unsafe_unretained
 #endif
@@ -165,13 +195,6 @@
 #include <stdarg.h>
 #include <stdint.h>
 #include <limits.h>
-
-#define NS_AVAILABLE(_mac, _ios)
-#define NS_AVAILABLE_MAC(_mac)
-#define NS_AVAILABLE_IOS(_ios)
-#define NS_DEPRECATED(_macIntro, _macDep, _iosIntro, _iosDep)
-#define NS_DEPRECATED_MAC(_macIntro, _macDep)
-#define NS_DEPRECATED_IOS(_iosIntro, _iosDep)
 
 #if (__cplusplus && __cplusplus >= 201103L && (__has_extension(cxx_strong_enums) || __has_feature(objc_fixed_enum))) || (!__cplusplus && __has_feature(objc_fixed_enum))
 #define NS_ENUM(_type, _name) enum _name : _type _name; enum _name : _type
@@ -207,8 +230,8 @@ FOUNDATION_EXPORT SEL NSSelectorFromString(NSString *aSelectorName);
 FOUNDATION_EXPORT NSString *NSStringFromClass(Class aClass);
 FOUNDATION_EXPORT Class NSClassFromString(NSString *aClassName);
 
-FOUNDATION_EXPORT NSString *NSStringFromProtocol(Protocol *proto) NS_AVAILABLE(10_5, 2_0);
-FOUNDATION_EXPORT Protocol *NSProtocolFromString(NSString *namestr) NS_AVAILABLE(10_5, 2_0);
+FOUNDATION_EXPORT NSString *NSStringFromProtocol(Protocol *proto);
+FOUNDATION_EXPORT Protocol *NSProtocolFromString(NSString *namestr);
 
 FOUNDATION_EXPORT const char *NSGetSizeAndAlignment(const char *typePtr, NSUInteger *sizep, NSUInteger *alignp);
 

@@ -36,6 +36,7 @@ typedef NS_OPTIONS(NSUInteger, NSStringEncodingConversionOptions) {
 
 @interface NSString : NSObject <NSCopying, NSMutableCopying>
 
+- (CFStringRef)CFString;
 - (NSUInteger)length;
 - (unichar)characterAtIndex:(NSUInteger)index;
 
