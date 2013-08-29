@@ -146,20 +146,53 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 
 - (NSArray *)arrayByAddingObject:(id)aObject
 {
-    
+    NSUInteger const count = [self count] + 1;
+    id *objects;
+    if(count < NSMaxStackArguments)
+        objects = alloca(count * sizeof(id));
+    else
+        objects = malloc(count * sizeof(id));
+
+    [self getObjects:objects range:(NSRange) {0, [self count]}];
+    objects[count-1] = aObject;
+
+    return [[self class] arrayWithObjects:objects count:count];
 }
-- (NSArray *)arrayByAddingObjectsFromArray:(NSArray *)otherArray
+- (NSArray *)arrayByAddingObjectsFromArray:(NSArray *)aArray
 {
+    NSUInteger const count = [self count] + [aArray count];
+    id *objects;
+    if(count < NSMaxStackArguments)
+        objects = alloca(count * sizeof(id));
+    else
+        objects = malloc(count * sizeof(id));
+
+    [self       getObjects:objects range:(NSRange) {0, [self count]}];
+    [aArray getObjects:objects range:(NSRange) {[self count], [aArray count]}];
+
+    return [[self class] arrayWithObjects:objects count:count];
 }
-- (NSString *)componentsJoinedByString:(NSString *)separator
+- (NSString *)componentsJoinedByString:(NSString *)aSeparator
 {
+    NSMutableString *joined = [NSMutableString string];
+    for(id obj in self) {
+        [joined appendString:[obj description]];
+        if(aSeparator)
+            [joined appendString:aSeparator];
+    }
+    return joined;
 }
 - (BOOL)containsObject:(id const)aObject
 {
     return CFArrayContainsValue(_cfArray, (CFRange){0,0}, aObject);
 }
-- (id)firstObjectCommonWithArray:(NSArray *)otherArray
+- (id)firstObjectCommonWithArray:(NSArray *)aArray
 {
+    for(id obj in self) {
+        if([aArray containsObject:obj])
+            return obj;
+    }
+    return nil;
 }
 - (void)getObjects:(id *)aoObjects range:(NSRange const)aRange
 {
