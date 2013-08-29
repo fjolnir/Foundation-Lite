@@ -2,7 +2,7 @@
 
 @class NSString;
 
-@interface NSNumber : NSObject
+@interface NSNumber : NSObject <NSCopying>
 + (NSNumber *)numberWithChar:(char)value;
 + (NSNumber *)numberWithUnsignedChar:(unsigned char)value;
 + (NSNumber *)numberWithShort:(short)value;

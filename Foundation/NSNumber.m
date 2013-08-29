@@ -301,4 +301,16 @@ Accessor(NSUInteger, unsignedInteger)
     }
 }
 
+- (id)copy
+{
+    switch(_type) {
+    case kNSIntegerNumberType:
+        return [[self class] numberWithLongLong:_value.integer];
+    case kNSUIntegerNumberType:
+        return [[self class] numberWithUnsignedLongLong:_value.unsignedInteger];
+    case kNSDoubleNumberType:
+        return [[self class] numberWithDouble:_value.dbl];
+    }
+}
+
 @end
