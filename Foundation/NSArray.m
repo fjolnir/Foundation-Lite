@@ -55,11 +55,9 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 + (id)arrayWithObjects:(id)aFirstObj, ...
 {
-    NSArray *array;
     NSWithIDArgs(aFirstObj,
-        array = [[self alloc] initWithObjects:__objects count:__count];
+        return [[self alloc] initWithObjects:__objects count:__count];
     );
-    return [array autorelease];
 }
 + (id)arrayWithArray:(NSArray *)aArray
 {
@@ -85,9 +83,8 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 - (id)initWithObjects:(id)aFirstObj, ...
 {
     NSWithIDArgs(aFirstObj,
-        self = [self initWithObjects:__objects count:__count];
+        return [self initWithObjects:__objects count:__count];
     );
-    return self;
 }
 - (id)initWithArray:(NSArray *)aArray
 {
@@ -118,28 +115,29 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     return _cfArray;
 }
 
-- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState * const)aState objects:(id * const)aBuffer count:(NSUInteger const)aLen
+- (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState * const)aState
+                                  objects:(__unsafe_unretained id * const)aBuffer
+                                    count:(NSUInteger const)aLen
 {
-    if(aState->state == 0) {
-        aState->mutationsPtr = (unsigned long *)[self hash];
-        aState->state = 1;
-        aState->extra[0] = 0;
-    } else {
-        unsigned long * const mutPtr = (unsigned long *)[self hash];
-        if(mutPtr != aState->mutationsPtr)
-            @throw [NSException exceptionWithName:@"Mutation Exception"
-                                           format:@"Array was mutated while enumerating!"];
-        else
-            aState->mutationsPtr = mutPtr;
-    }
+    NSUInteger count = [self count];
+    NSInteger length = MIN(aLen, count - aState->state);
+
+    if(aState->state > 0 && count != *aState->mutationsPtr)
+        @throw [NSException exceptionWithName:@"Mutation Exception"
+                                       format:@"Array was mutated while enumerating!"];
+
+    aState->extra[0] = count;
+    aState->mutationsPtr = &aState->extra[0];
     aState->itemsPtr = aBuffer;
 
-    NSUInteger const count = MIN([self count] - aState->extra[0], aLen);
-    CFRange    const range = { aState->extra[0], count };
-    CFArrayGetValues(_cfArray, range, (const void **)aBuffer);
-    aState->extra[0] = range.location + range.length;
-
-    return count;
+    if(length > 0) {
+        CFRange const range = { aState->state, length };
+        CFArrayGetValues(_cfArray, range, (const void **)aState->itemsPtr);
+        aState->state += length;
+    } else {
+        length = 0;
+    }
+    return length;
 }
 
 - (NSUInteger)count
@@ -186,7 +184,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     for(id obj in self) {
         if(!first && aSeparator)
             [joined appendString:aSeparator];
-        else
+        else if(first)
             first = NO;
         [joined appendString:[obj description]];
     }
@@ -235,7 +233,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 - (BOOL)isEqualToArray:(NSArray *)aArray
 {
-    return [self hash] == [aArray hash];
+    return CFEqual(_cfArray, [aArray CFArray]);
 }
 - (id)lastObject
 {
@@ -283,6 +281,11 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 - (id)objectAtIndexedSubscript:(NSUInteger)aIdx
 {
     return (id)CFArrayGetValueAtIndex(_cfArray, aIdx);
+}
+
+- (NSUInteger)hash
+{
+    return CFHash(_cfArray);
 }
 
 @end
