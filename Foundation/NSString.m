@@ -241,7 +241,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 }
 - (BOOL)isEqualToString:(NSString *)aString
 {
-    return [self compare:aString] == NSOrderedSame;
+    return CFEqual([self CFString], [aString CFString]);
 }
 - (BOOL)isEqual:(id)aObj
 {
@@ -380,7 +380,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 - (id)initWithString:(NSString *)aString
 {
     if((self = [super init])) {
-        _cfString = [aString CFString];
+        _cfString = (CFMutableStringRef)[aString CFString];
         MakeCFStringMutable();
     }
     return self;
