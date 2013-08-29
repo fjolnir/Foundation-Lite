@@ -6,7 +6,7 @@
 #import <Foundation/NSString.h>
 #import <Foundation/NSNumber.h>
 #import <Foundation/NSArray.h>
-//#import <Foundation/NSDictionary.h>
+#import <Foundation/NSDictionary.h>
 //#import <Foundation/NSBundle.h>
 //#import <Foundation/NSCalendar.h>
 //#import <Foundation/NSCharacterSet.h>

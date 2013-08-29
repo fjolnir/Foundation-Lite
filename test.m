@@ -32,11 +32,15 @@ int main()
         NSLog(@"                %@", mutableStr);
 
         NSArray *array = @[@1, @2, @3];
-        NSLog(@"Array: %@ -> %@", array, array[1]);
+
+        NSLog(@"Array: %@", array);
         for(id obj in array) {
             NSLog(@" > %@", obj);
         }
         
+        NSDictionary *dict = @{ @1: @1, @2: @2, @3: @3 };
+        NSLog(@"Dictionary: %@", dict);
+
         Test *test = [Test new];
         NSLog(@"Test class: %@ instance: %@", [Test class], test);
         [test performSelector:@selector(stringValue)];
