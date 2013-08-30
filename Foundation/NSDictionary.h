@@ -4,7 +4,7 @@
 
 @class NSArray, NSString;
 
-@interface NSDictionary : NSObject <NSCopying, NSFastEnumeration>
+@interface NSDictionary : NSObject <NSCopying, NSMutableCopying, NSFastEnumeration>
 
 + (id)dictionary;
 + (id)dictionaryWithObject:(id)aObject forKey:(id <NSCopying>)aKey;
@@ -47,8 +47,6 @@
 @interface NSMutableDictionary : NSDictionary
 
 + (id)dictionaryWithCapacity:(NSUInteger)aNumItems;
-+ (id)dictionaryWithCapacity:(NSUInteger)aNumItems;
-- (id)initWithCapacity:(NSUInteger)aNumItems;
 - (id)initWithCapacity:(NSUInteger)aNumItems;
 
 - (void)removeObjectForKey:(id)aAKey;

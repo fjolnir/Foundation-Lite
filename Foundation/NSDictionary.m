@@ -5,6 +5,7 @@
 #import "NSNumber.h"
 
 @interface NSDictionary () {
+    @protected
     CFDictionaryRef _cfDict;
 }
 @end
@@ -105,9 +106,22 @@ static CFDictionaryValueCallBacks _NSDictionaryValueCallBacks = {
         _cfDict = CFDictionaryCreateCopy(NULL, [aDictionary CFDictionary]);
     return self;
 }
-- (id)initWithDictionary:(NSDictionary *)aOtherDictionary copyItems:(BOOL)aFlag
+- (id)initWithDictionary:(NSDictionary *)aDictionary copyItems:(BOOL)aCopy
 {
-    
+    if((self = [super init])) {
+        id *keys = malloc([aDictionary count] * sizeof(id));
+        id *objs = malloc([aDictionary count] * sizeof(id));
+        CFDictionaryGetKeysAndValues(_cfDict, (const void **)keys, (const void **)objs);
+        if(aCopy) {
+            for(NSUInteger i = 0; i < [aDictionary count]; ++i) {
+                objs[i] = [objs[i] copy];
+            }
+        }
+        self = [self initWithObjects:objs forKeys:keys count:[aDictionary count]];
+        free(keys);
+        free(objs);
+    }
+    return self;
 }
 - (id)initWithObjects:(NSArray *)aObjects forKeys:(NSArray *)aKeys
 {
@@ -199,14 +213,18 @@ static CFDictionaryValueCallBacks _NSDictionaryValueCallBacks = {
 
 - (id)copy
 {
-    return [[self class] dictionaryWithDictionary:self];
+    return [NSDictionary dictionaryWithDictionary:self];
+}
+- (id)mutableCopy
+{
+    return [NSMutableDictionary dictionaryWithDictionary:self];
 }
 
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState * const)aState objects:(id * const)aBuffer count:(NSUInteger const)aLen
 {
-    if(aState->state == 0) {
+    if(aState->state == 0)
+        // This will go away if some doofus drains the pool in the middle of the loop => maybe come up with a different way?
         aState->extra[1] = (unsigned long)[self allKeys];
-    }
     return [(id)aState->extra[1] countByEnumeratingWithState:aState objects:aBuffer count:aLen];
 }
 
@@ -225,6 +243,91 @@ static CFDictionaryValueCallBacks _NSDictionaryValueCallBacks = {
     [desc appendString:@"\n}"];
     return desc;
 }
+
 @end
 
+@implementation NSMutableDictionary
 
+#define MakeCFDictMutable() do { \
+    CFDictionaryRef oldDict = _cfDict; \
+    _cfDict = CFDictionaryCreateMutableCopy(NULL, 0, _cfDict); \
+    CFRelease(oldDict); \
+} while(0)
+
++ (id)dictionaryWithCapacity:(NSUInteger)aCapacity
+{
+    return [[[self alloc] initWithCapacity:aCapacity] autorelease];
+}
+
+- (id)initWithCapacity:(NSUInteger)aCapacity
+{
+    if((self = [super init]))
+        _cfDict = CFDictionaryCreateMutable(NULL, aCapacity, &_NSDictionaryKeyCallBacks, &_NSDictionaryValueCallBacks);
+    return self;
+}
+- (id)init
+{
+    return [self initWithCapacity:0];
+}
+- (id)initWithObjects:(const id [])aObjects forKeys:(const id <NSCopying> [])aKeys count:(NSUInteger)aCnt
+{
+    if((self = [super initWithObjects:aObjects forKeys:aKeys count:aCnt]))
+        MakeCFDictMutable();
+    return self;
+}
+- (id)initWithDictionary:(NSDictionary *)aDictionary
+{
+    if((self = [super init]))
+        _cfDict = CFDictionaryCreateMutableCopy(NULL, 0, [aDictionary CFDictionary]);
+    return self;
+}
+- (id)initWithDictionary:(NSDictionary *)aDictionary copyItems:(BOOL)aCopy
+{
+    if((self = [super initWithDictionary:aDictionary copyItems:aCopy]))
+        MakeCFDictMutable();
+    return self;
+}
+- (id)initWithObjects:(NSArray *)aObjects forKeys:(NSArray *)aKeys
+{
+    if((self = [super initWithObjects:aObjects forKeys:aKeys]))
+        MakeCFDictMutable();
+    return self;
+}
+
+- (void)removeObjectForKey:(id)aKey
+{
+    CFDictionaryRemoveValue((CFMutableDictionaryRef)_cfDict, (const void *)aKey);
+}
+- (void)setObject:(id)aObject forKey:(id <NSCopying>)aKey
+{
+    CFDictionarySetValue((CFMutableDictionaryRef)_cfDict, (const void *)aKey, (const void *)aObject);
+}
+
+- (void)addEntriesFromDictionary:(NSDictionary *)aDictionary
+{
+    for(id key in aDictionary) {
+        self[key] = aDictionary[key];
+    }
+}
+
+- (void)removeAllObjects
+{
+    CFDictionaryRemoveAllValues((CFMutableDictionaryRef)_cfDict);
+}
+- (void)removeObjectsForKeys:(NSArray *)aKeys
+{
+    for(id key in aKeys)
+        [self removeObjectForKey:key];
+}
+- (void)setDictionary:(NSDictionary *)aDictionary
+{
+    [self removeAllObjects];
+    [self addEntriesFromDictionary:aDictionary];
+}
+
+- (void)setObject:(id)aObj forKeyedSubscript:(id <NSCopying>)aKey
+{
+    CFDictionarySetValue((CFMutableDictionaryRef)_cfDict, (const void *)aKey, (const void *)aObj);
+}
+
+@end
