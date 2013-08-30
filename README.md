@@ -4,7 +4,7 @@
 
 Foundation lite is a limited subset of Cocoa's Foundation framework, intented for use on Linux (IA64).
 
-It deliberately only implements only the absolute core aspects of Foundation with the goal of making it feasible to deploy Objective-C feasible on Linux servers.
+It deliberately only implements only the absolute core components of Foundation with the goal of making it feasible to deploy Objective-C feasible on Linux servers. 
 
 Most of the types implemented are simple wrappers around Apple's own CoreFoundation Lite (hence Foundation Lite), meaning that these are no half-assed implementation I whipped up in my spare time, and should have roughly the same performance characteristics as those on MacOS, and will be updated with each release of it.
 
@@ -16,12 +16,12 @@ Most of the types implemented are simple wrappers around Apple's own CoreFoundat
 * ICU4C 4.4+: http://site.icu-project.org/
 * libobjc2 http://svn.gna.org/svn/gnustep/libs/libobjc2/
 
-## Installing dependencies on Debian (And  derivatives)
+### Installing dependencies on Debian (And  derivatives)
 
-Install the latest version of clang using one of the sources on http://llvm.org/apt/
+Install the latest version of clang using one of the sources on [http://llvm.org/apt](http://llvm.org/apt)
 
     sudo echo "<repo url>" >>  /etc/apt/sources.list
-    wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key|sudo apt-key add -
+    wget -O - http://llvm.org/apt/llvm-snapshot.gpg.key | sudo apt-key add -
     sudo apt-get update
     
     sudo apt-get install clang-3.4
@@ -40,4 +40,5 @@ Install the latest version of clang using one of the sources on http://llvm.org/
     pushd cflite
     sudo make -f MakefileLinux install
     popd
-    
+
+And then simply execute `make` in your Foundation-Lite directory to try it out. (There's no `make install` yet because it is not mature enough to warrant installing)
