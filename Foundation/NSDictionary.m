@@ -213,11 +213,11 @@ static CFDictionaryValueCallBacks _NSDictionaryValueCallBacks = {
 
 - (id)copy
 {
-    return [NSDictionary dictionaryWithDictionary:self];
+    return [[NSDictionary alloc] initWithDictionary:self];
 }
 - (id)mutableCopy
 {
-    return [NSMutableDictionary dictionaryWithDictionary:self];
+    return [[NSMutableDictionary alloc] initWithDictionary:self];
 }
 
 - (NSUInteger)countByEnumeratingWithState:(NSFastEnumerationState * const)aState objects:(id * const)aBuffer count:(NSUInteger const)aLen
@@ -241,7 +241,7 @@ static CFDictionaryValueCallBacks _NSDictionaryValueCallBacks = {
         [desc appendFormat:@"%@ = %@", key, self[key]];
     }
     [desc appendString:@"\n}"];
-    return desc;
+    return [desc autorelease];
 }
 
 @end

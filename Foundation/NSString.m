@@ -7,7 +7,7 @@ CF_EXPORT CFStringRef  _CFStringCreateWithFormatAndArgumentsAux(CFAllocatorRef a
 
 
 @interface NSString ()
-+ (id)_realAlloc;
++ (id)_alloc;
 @end
 
 
@@ -47,7 +47,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 + (id)alloc
 {
-    return [super _realAlloc];
+    return [super _alloc];
 }
 
 - (id)initWithCFString:(CFStringRef const)aCFStr
@@ -153,7 +153,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 @implementation NSString
 
-+ (id)_realAlloc
++ (id)_alloc
 {
     return [super alloc];
 }
@@ -328,11 +328,11 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 - (id)copy
 {
-    return [NSCFString stringWithString:self];
+    return [[NSCFString alloc] initWithString:self];
 }
 - (id)mutableCopy
 {
-    return [NSMutableString stringWithString:self];
+    return [[NSMutableString alloc] initWithString:self];
 }
 @end
 
@@ -346,7 +346,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 + (id)alloc
 {
-    return [self _realAlloc];
+    return [self _alloc];
 }
 
 + (id)stringWithCapacity:(NSUInteger)aCapacity
@@ -379,7 +379,7 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 - (id)initWithString:(NSString *)aString
 {
     if((self = [super init])) {
-        _cfString = (CFMutableStringRef)[aString CFString];
+        _cfString = (CFMutableStringRef)CFRetain([aString CFString]);
         MakeCFStringMutable();
     }
     return self;

@@ -248,7 +248,7 @@ static struct objc_slot *retrieve_doesNotRecognizeSelector(id aReceiver, SEL aSe
 - (void)doesNotRecognizeSelector:(SEL)aSelector
 {
     @throw [NSException exceptionWithName:@"UnrecognizedSelectorException"
-                                   format:@"+[%@ %s]: unrecognized selector sent to object %p", [self class], sel_getName(aSelector), self];
+                                   format:@"-[%@ %s]: unrecognized selector sent to object %p", [self class], sel_getName(aSelector), self];
 }
 
 

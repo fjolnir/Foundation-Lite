@@ -51,7 +51,6 @@ typedef NS_OPTIONS(NSUInteger, NSStringEncodingConversionOptions) {
 + (id)stringWithFormat:(NSString *)format, ... NS_FORMAT_FUNCTION(1,2);
 + (id)stringWithCString:(const char *)cString encoding:(NSStringEncoding)enc;
 
-- (id)init;
 - (id)initWithCFString:(CFStringRef const)aCFStr;
 - (id)initWithCharacters:(const unichar *)characters length:(NSUInteger)length;
 - (id)initWithUTF8String:(const char *)nullTerminatedCString;

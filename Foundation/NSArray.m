@@ -89,7 +89,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 - (id)initWithArray:(NSArray *)aArray
 {
-    if([super init])
+    if((self = [super init]))
         _cfArray = CFArrayCreateCopy(NULL, [aArray CFArray]);
     return self;
 }
@@ -109,7 +109,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     NSMutableString *desc = [@"(\n\t" mutableCopy];
     [desc appendString:[self componentsJoinedByString:@",\n\t"]];
     [desc appendString:@"\n)"];
-    return desc;
+    return [desc autorelease];
 }
 - (CFArrayRef)CFArray
 {
@@ -249,7 +249,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     CFArraySortValues(sorted, (CFRange){0,0}, &_NSArrayCompareObjects, NULL);
     NSArray *result = [[NSArray alloc] initWithCFArray:sorted];
     CFRelease(sorted);
-    return result;
+    return [result autorelease];
 }
 - (NSArray *)subarrayWithRange:(NSRange)aRange
 {
@@ -338,7 +338,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 - (id)initWithArray:(NSArray *)aArray
 {
-    if([super init])
+    if((self = [super init]))
         _cfArray = CFArrayCreateMutableCopy(NULL, 0, [aArray CFArray]);
     return self;
 }
