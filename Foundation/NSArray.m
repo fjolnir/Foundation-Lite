@@ -5,7 +5,8 @@
 #import <CoreFoundation/CFString.h>
 
 @interface NSArray () {
-    CFTypeRef _cfArray;
+@protected
+    CFArrayRef _cfArray;
 }
 @end
 
@@ -45,13 +46,13 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 {
     return [[[self alloc] init] autorelease];
 }
-+ (id)arrayWithObject:(id)aObject
++ (id)arrayWithObject:(id)aObj
 {
-    return [[[self alloc] initWithObjects:aObject, nil] autorelease];
+    return [[[self alloc] initWithObjects:aObj, nil] autorelease];
 }
-+ (id)arrayWithObjects:(const id[])aObjects count:(NSUInteger)aCount
++ (id)arrayWithObjects:(const id[])aObjs count:(NSUInteger)aCount
 {
-    return [[[self alloc] initWithObjects:aObjects count:aCount] autorelease];
+    return [[[self alloc] initWithObjects:aObjs count:aCount] autorelease];
 }
 + (id)arrayWithObjects:(id)aFirstObj, ...
 {
@@ -74,10 +75,10 @@ static CFArrayCallBacks _NSArrayCallBacks = {
         _cfArray = CFArrayCreateCopy(NULL, aCFArray);
     return self;
 }
-- (id)initWithObjects:(const id[])aObjects count:(NSUInteger)aCount
+- (id)initWithObjects:(const id[])aObjs count:(NSUInteger)aCount
 {
     if((self = [super init]))
-        _cfArray = CFArrayCreate(NULL, (const void **)aObjects, aCount, &_NSArrayCallBacks);
+        _cfArray = CFArrayCreate(NULL, (const void **)aObjs, aCount, &_NSArrayCallBacks);
     return self;
 }
 - (id)initWithObjects:(id)aFirstObj, ...
@@ -98,7 +99,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     id copies[count];
     id *head = copies;
     for(id obj in aArray) {
-        *(head++) = [obj copy];
+        *(head++) = [[obj copy] autorelease];
     }
     return [self initWithObjects:copies count:count];
 }
@@ -149,7 +150,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     return (id)CFArrayGetValueAtIndex(_cfArray, aIdx);
 }
 
-- (NSArray *)arrayByAddingObject:(id)aObject
+- (NSArray *)arrayByAddingObject:(id)aObj
 {
     NSUInteger const count = [self count] + 1;
     id *objects;
@@ -159,7 +160,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
         objects = malloc(count * sizeof(id));
 
     [self getObjects:objects range:(NSRange) {0, [self count]}];
-    objects[count-1] = aObject;
+    objects[count-1] = aObj;
 
     return [[self class] arrayWithObjects:objects count:count];
 }
@@ -190,9 +191,9 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     }
     return joined;
 }
-- (BOOL)containsObject:(id const)aObject
+- (BOOL)containsObject:(id const)aObj
 {
-    return CFArrayContainsValue(_cfArray, (CFRange){0,0}, aObject);
+    return CFArrayContainsValue(_cfArray, (CFRange){0,0}, aObj);
 }
 - (id)firstObjectCommonWithArray:(NSArray *)aArray
 {
@@ -206,26 +207,26 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 {
     CFArrayGetValues(_cfArray, *(CFRange *)&aRange, (const void **)aoObjects);
 }
-- (NSUInteger)indexOfObject:(id const)aObject
+- (NSUInteger)indexOfObject:(id const)aObj
 {
-    return [self indexOfObject:aObject inRange:(NSRange){0,0}];
+    return [self indexOfObject:aObj inRange:(NSRange){0,0}];
 }
-- (NSUInteger)indexOfObject:(id const)aObject inRange:(NSRange const)aRange
+- (NSUInteger)indexOfObject:(id const)aObj inRange:(NSRange const)aRange
 {
-    return CFArrayGetFirstIndexOfValue(_cfArray, *(CFRange *)&aRange, aObject);
+    return CFArrayGetFirstIndexOfValue(_cfArray, *(CFRange *)&aRange, aObj);
 }
-- (NSUInteger)indexOfObjectIdenticalTo:(id)aObject
+- (NSUInteger)indexOfObjectIdenticalTo:(id)aObj
 {
-    return [self indexOfObjectIdenticalTo:aObject inRange:(NSRange){0,0}];
+    return [self indexOfObjectIdenticalTo:aObj inRange:(NSRange){0,0}];
 }
-- (NSUInteger)indexOfObjectIdenticalTo:(id)aObject inRange:(NSRange)range
+- (NSUInteger)indexOfObjectIdenticalTo:(id)aObj inRange:(NSRange)range
 {
     NSUInteger       idx = (range.length == 0) ? 0 : range.location;
     NSUInteger const max = (range.length == 0) ? [self count] : range.location + range.length;
     for(id obj in self) {
         if(idx >= max)
             break;
-        else if(obj == aObject)
+        else if(obj == aObj)
             return idx;
         ++idx;
     }
@@ -286,6 +287,159 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 - (NSUInteger)hash
 {
     return CFHash(_cfArray);
+}
+
+- (id)copy
+{
+    return [[NSArray alloc] initWithArray:self];
+}
+- (id)mutableCopy
+{
+    return [[NSMutableArray alloc] initWithArray:self];
+}
+
+@end
+
+
+@implementation NSMutableArray
+
+#define MakeCFArrayMutable() do { \
+    CFArrayRef oldArr = _cfArray; \
+    _cfArray = CFArrayCreateMutableCopy(NULL, 0, _cfArray); \
+    CFRelease(oldArr); \
+} while(0)
+
++ (id)arrayWithCapacity:(NSUInteger)aCapacity
+{
+    return [[[self alloc] initWithCapacity:aCapacity] autorelease];
+}
+
+- (id)initWithCapacity:(NSUInteger)aCapacity
+{
+    if((self = [super init]))
+        _cfArray = CFArrayCreateMutable(NULL, aCapacity, &_NSArrayCallBacks);
+    return self;
+}
+- (id)init
+{
+    return [self initWithCapacity:0];
+}
+- (id)initWithCFArray:(CFArrayRef)aCFArray
+{
+    if((self = [super init]))
+        _cfArray = CFArrayCreateMutableCopy(NULL, 0, aCFArray);
+    return self;
+}
+- (id)initWithObjects:(const id[])aObjs count:(NSUInteger)aCount
+{
+    if((self = [super initWithObjects:aObjs count:aCount]))
+        MakeCFArrayMutable();
+    return self;
+}
+- (id)initWithArray:(NSArray *)aArray
+{
+    if([super init])
+        _cfArray = CFArrayCreateMutableCopy(NULL, 0, [aArray CFArray]);
+    return self;
+}
+- (id)initWithArray:(NSArray *)aArray copyItems:(BOOL)aCopy
+{
+    if((self = [super initWithArray:aArray copyItems:aCopy]))
+        MakeCFArrayMutable();
+    return self;
+}
+
+- (void)addObject:(id)aObj
+{
+    CFArrayAppendValue((CFMutableArrayRef)_cfArray, (const void *)aObj);
+}
+- (void)insertObject:(id)aObj atIndex:(NSUInteger)aIdx
+{
+    CFArrayInsertValueAtIndex((CFMutableArrayRef)_cfArray, aIdx, (const void *)aObj);
+}
+- (void)removeLastObject
+{
+    [self removeObjectAtIndex:[self count] - 1];
+}
+- (void)removeObjectAtIndex:(NSUInteger)aIdx
+{
+    CFArrayRemoveValueAtIndex((CFMutableArrayRef)_cfArray, aIdx);
+}
+- (void)replaceObjectAtIndex:(NSUInteger)aIdx withObject:(id)aObj
+{
+    CFArraySetValueAtIndex((CFMutableArrayRef)_cfArray, aIdx, (const void *)aObj);
+}
+
+- (void)addObjectsFromArray:(NSArray *)aArray
+{
+    for(id obj in aArray) {
+        [self addObject:obj];
+    }
+}
+- (void)exchangeObjectAtIndex:(NSUInteger)aIdx1 withObjectAtIndex:(NSUInteger)aIdx2
+{
+    CFArrayExchangeValuesAtIndices((CFMutableArrayRef)_cfArray, aIdx1, aIdx2);
+}
+- (void)removeAllObjects
+{
+    CFArrayRemoveAllValues((CFMutableArrayRef)_cfArray);
+}
+- (void)removeObject:(id)aObj inRange:(NSRange)aRange
+{
+    for(NSUInteger i = aRange.location+aRange.length-1; i >= aRange.location; --i) {
+        if([self[i] isEqual:aObj])
+            [self removeObjectAtIndex:i];
+    }
+}
+- (void)removeObject:(id)aObj
+{
+    [self removeObject:aObj inRange:(NSRange){0, [self count]}];
+}
+- (void)removeObjectIdenticalTo:(id)aObj inRange:(NSRange)aRange
+{
+    for(NSUInteger i = aRange.location+aRange.length-1; i >= aRange.location; --i) {
+        if(self[i] == aObj)
+            [self removeObjectAtIndex:i];
+    }
+}
+- (void)removeObjectIdenticalTo:(id)aObj
+{
+    [self removeObjectIdenticalTo:aObj inRange:(NSRange) {0, [self count]}];
+}
+- (void)removeObjectsInArray:(NSArray *)aArray
+{
+    for(id obj in aArray) {
+        [self removeObject:obj];
+    }
+}
+- (void)removeObjectsInRange:(NSRange)aRange
+{
+    for(NSUInteger i = aRange.location+aRange.length-1; i >= aRange.location; --i) {
+        [self removeObjectAtIndex:i];
+    }
+}
+- (void)replaceObjectsInRange:(NSRange)aRange withObjectsFromArray:(NSArray *)aOtherArray range:(NSRange)aOtherRange
+{
+}
+- (void)replaceObjectsInRange:(NSRange)aRange withObjectsFromArray:(NSArray *)aArray
+{
+    [self replaceObjectsInRange:aRange withObjectsFromArray:aArray range:(NSRange) {0, [aArray count] }];
+}
+- (void)setArray:(NSArray *)aArray
+{
+    id *values = malloc([aArray count] * sizeof(id));
+    [aArray getObjects:values range:(NSRange){ 0, 0 }];
+    CFArrayReplaceValues((CFMutableArrayRef)_cfArray, (CFRange){ 0, [self count] }, (const void **)values, [aArray count]);
+    free(values);
+}
+- (void)sortUsingSelector:(SEL)comparator
+{
+    CFArraySortValues((CFMutableArrayRef)_cfArray, (CFRange){0,0}, &_NSArrayCompareObjects, NULL);
+}
+
+- (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx
+{
+    CFArraySetValueAtIndex((CFMutableArrayRef)_cfArray, aIdx, (const void *)aObj);
 }
 
 @end
