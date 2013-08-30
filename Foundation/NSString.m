@@ -338,12 +338,11 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 @implementation NSMutableString
 
-#define SetCFStringNoRetain(newVal) do { \
-    CFStringRef oldStr = _cfString;         \
-    _cfString = (newVal);                   \
-    CFRelease(oldStr);                   \
+#define MakeCFStringMutable() do { \
+    CFStringRef oldStr = _cfString; \
+    _cfString = CFStringCreateMutableCopy(NULL, [self length], _cfString); \
+    CFRelease(oldStr); \
 } while(0)
-#define MakeCFStringMutable()  SetCFStringNoRetain(CFStringCreateMutableCopy(NULL, [self length], _cfString))
 
 + (id)alloc
 {
