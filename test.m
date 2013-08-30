@@ -41,6 +41,8 @@ int main()
         NSDictionary *dict = @{ @1: @1, @2: @2, @3: @3 };
         NSLog(@"Dictionary: %@", dict);
 
+        NSLog(@"Today: %@", [NSDate new]);
+
         Test *test = [Test new];
         NSLog(@"Test class: %@ instance: %@", [Test class], test);
         [test performSelector:@selector(stringValue)];

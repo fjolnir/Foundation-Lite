@@ -8,6 +8,7 @@ SRC       = test.m \
             Foundation/NSNumber.m \
             Foundation/NSException.m \
             Foundation/NSData.m \
+            Foundation/NSDate.m \
             Foundation/NSError.m
 
 SRC_NOARC = Foundation/NSObject.m \
