@@ -254,6 +254,14 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
     CFRange const range = CFStringFind([self CFString], [aString CFString], 0);
     return *(NSRange *)&range;
 }
+- (BOOL)hasPrefix:(NSString *)aPrefix
+{
+    return CFStringHasPrefix([self CFString], [aPrefix CFString]);
+}
+- (BOOL)hasSuffix:(NSString *)aSuffix
+{
+    return CFStringHasSuffix([self CFString], [aSuffix CFString]);
+}
 - (NSString *)stringByAppendingString:(NSString *)aString
 {
     CFArrayRef strings = CFArrayCreate(NULL, (CFTypeRef[]) {
@@ -265,6 +273,16 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
     CFRelease(strings);
 
     return result;
+}
+
+- (NSString *)stringByReplacingOccurrencesOfString:(NSString *)aNeedle withString:(NSString *)aReplacement
+{
+    CFMutableStringRef temp = CFStringCreateMutableCopy(NULL, 0, [self CFString]);
+    CFStringFindAndReplace(temp, [aNeedle CFString], [aReplacement CFString], (CFRange){0,[self length]}, 0);
+    NSString *result = [[[self class] alloc] initWithCFString:temp];
+
+    CFRelease(temp);
+    return [result autorelease];
 }
 
 - (double)doubleValue
