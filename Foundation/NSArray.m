@@ -12,7 +12,7 @@
 
 CFComparisonResult _NSArrayCompareObjects(const void *aA, const void *aB, void *aCtx)
 {
-    return (CFComparisonResult)[(id)aA compare:(id)aB];
+    return (CFComparisonResult)[(id)aA performSelector:(SEL)aCtx withObject:(id)aB];
 }
 
 const void *_NSArrayRetainCallback(CFAllocatorRef aAllocator, const void *aObj)
@@ -386,7 +386,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 - (void)removeObject:(id)aObj inRange:(NSRange)aRange
 {
-    for(NSUInteger i = aRange.location+aRange.length-1; i >= aRange.location; --i) {
+    for(NSInteger i = aRange.location+aRange.length-1; i >= (NSInteger)aRange.location; --i) {
         if([self[i] isEqual:aObj])
             [self removeObjectAtIndex:i];
     }
@@ -397,7 +397,7 @@ static CFArrayCallBacks _NSArrayCallBacks = {
 }
 - (void)removeObjectIdenticalTo:(id)aObj inRange:(NSRange)aRange
 {
-    for(NSUInteger i = aRange.location+aRange.length-1; i >= aRange.location; --i) {
+    for(NSInteger i = aRange.location+aRange.length-1; i >= (NSInteger)aRange.location; --i) {
         if(self[i] == aObj)
             [self removeObjectAtIndex:i];
     }
@@ -432,9 +432,9 @@ static CFArrayCallBacks _NSArrayCallBacks = {
     CFArrayReplaceValues((CFMutableArrayRef)_cfArray, (CFRange){ 0, [self count] }, (const void **)values, [aArray count]);
     free(values);
 }
-- (void)sortUsingSelector:(SEL)comparator
+- (void)sortUsingSelector:(SEL)aComparator
 {
-    CFArraySortValues((CFMutableArrayRef)_cfArray, (CFRange){0,0}, &_NSArrayCompareObjects, NULL);
+    CFArraySortValues((CFMutableArrayRef)_cfArray, (CFRange){0,[self count]}, &_NSArrayCompareObjects, aComparator);
 }
 
 - (void)setObject:(id)aObj atIndexedSubscript:(NSUInteger)aIdx
