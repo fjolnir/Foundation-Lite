@@ -22,7 +22,7 @@
     __processIdArgs:                                                                         \
     va_start(__ap, firstArg);                                                                \
     __obj = firstArg;                                                                        \
-    while(__obj && __count < NSMaxStackArguments) {                                          \
+    while(__obj) {                                                                           \
         __objects[__count] = __obj;                                                          \
         __obj = va_arg(__ap, id);                                                            \
         if(++__count == NSMaxStackArguments) {                                               \
