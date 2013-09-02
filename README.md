@@ -1,6 +1,6 @@
 # Foundation Lite
 
-**NOTE:** This is still super *super* early in development.
+**NOTE:** This is still super *super* early in development. (To see what has been implemented you can read `Foundation.h`, the uncommented classes are implemented. Although not all are finished)
 
 Foundation lite is a limited subset of Cocoa's Foundation framework, intented for use on Linux (IA64).
 
@@ -42,3 +42,9 @@ Install the latest version of clang using one of the sources on [http://llvm.org
     popd
 
 And then simply execute `make` in your Foundation-Lite directory to try it out. (There's no `make install` yet because it is not mature enough to warrant installing)
+
+## Contributing:
+
+The easiest way to begin contributing is to help increase the test coverage. The test format is very simple and anyone with Objective-C experience should be able to learn it just by glancing at the files in `testcases/`
+
+And of course I welcome implementations of any NS* classes that I have not gotten around to yet!
