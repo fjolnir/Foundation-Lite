@@ -12,6 +12,7 @@ SRC       = Foundation/NSObjCRuntime.m \
             Foundation/NSException.m \
             Foundation/NSData.m \
             Foundation/NSDate.m \
+            Foundation/NSURL.m \
             Foundation/NSError.m
 
 SRC_NOARC = Foundation/NSObject.m \
