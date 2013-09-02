@@ -1,5 +1,6 @@
 #import "NSException.h"
 #import "NSString.h"
+#import "NSDictionary.h"
 #import <objc/hooks.h>
 
 @interface NSException () {
@@ -50,7 +51,7 @@ static void _handleUnexpectedException(id aException)
     if((self = [super init])) {
         _name   = [aName copy];
         _reason = [aReason copy];
-       // _userInfo = [aUserInfo copy];
+        _userInfo = [aUserInfo copy];
     }
     return self;
 }
