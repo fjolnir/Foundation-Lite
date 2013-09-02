@@ -172,14 +172,12 @@ NSString *NSURLFileScheme = @"file";
 
 - (BOOL)isFileURL
 {
-    assert(0); // TODO
-    return NO;
+    return [[self scheme] isEqual:NSURLFileScheme];
 }
 
 - (NSURL *)standardizedURL
 {
-    assert(0); // TODO
-    return nil;
+    return [self absoluteURL];
 }
 
 - (id)copy
