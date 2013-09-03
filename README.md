@@ -2,7 +2,7 @@
 
 **NOTE:** This is still super *super* early in development. (To see what has been implemented you can read `Foundation.h`, the uncommented classes are implemented. Although not all are finished)
 
-Foundation lite is a limited subset of Cocoa's Foundation framework, intented for use on Linux (IA64).
+Foundation lite is a limited subset of Cocoa's Foundation framework, intented for use on Linux (x86_64).
 
 It deliberately only implements only the absolute core components of Foundation with the goal of making it feasible to deploy Objective-C on Linux servers. 
 
