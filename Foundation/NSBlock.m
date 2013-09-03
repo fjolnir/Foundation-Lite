@@ -11,7 +11,8 @@ extern BOOL objc_create_block_classes_as_subclasses_of(Class aClass);
 
 + (void)load
 {
-    assert(objc_create_block_classes_as_subclasses_of(self));
+    NSAssert(objc_create_block_classes_as_subclasses_of(self),
+             @"Unable to initialize block support");
 }
 
 - (id)copy
