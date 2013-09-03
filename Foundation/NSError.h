@@ -5,6 +5,9 @@
 // Predefined domain for errors from most AppKit and Foundation APIs.
 FOUNDATION_EXPORT NSString * const NSCocoaErrorDomain;
 
+
+FOUNDATION_EXPORT NSString * const NSLocalizedDescriptionKey;
+
 // Other predefined domains; value of "code" will correspond to preexisting values in these domains.
 FOUNDATION_EXPORT NSString * const NSPOSIXErrorDomain;
 FOUNDATION_EXPORT NSString * const NSOSStatusErrorDomain;

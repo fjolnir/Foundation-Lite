@@ -178,7 +178,6 @@ static struct objc_slot *retrieve_doesNotRecognizeSelector(id aReceiver, SEL aSe
 
 - (BOOL)respondsToSelector:(SEL)aSelector
 {
-    printf("!! %s\n", sel_getName(aSelector));
    return class_respondsToSelector([self class], aSelector);
 }
 

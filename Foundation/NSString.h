@@ -59,6 +59,7 @@ typedef NS_OPTIONS(NSUInteger, NSStringEncodingConversionOptions) {
 - (id)initWithFormat:(NSString *)format arguments:(va_list)argList NS_FORMAT_FUNCTION(1,0);
 - (id)initWithData:(NSData *)data encoding:(NSStringEncoding)encoding;
 - (id)initWithBytes:(const void *)bytes length:(NSUInteger)len encoding:(NSStringEncoding)encoding;
+- (id)initWithBytesNoCopy:(void *)bytes length:(NSUInteger)length encoding:(NSStringEncoding)encoding freeWhenDone:(BOOL)flag;
 - (id)initWithCString:(const char *)nullTerminatedCString encoding:(NSStringEncoding)encoding;
 
 - (void)getCharacters:(unichar *)buffer range:(NSRange)aRange;
@@ -106,6 +107,7 @@ typedef NS_OPTIONS(NSUInteger, NSStringEncodingConversionOptions) {
 - (NSString *)stringByReplacingCharactersInRange:(NSRange)range withString:(NSString *)replacement;
 
 - (const char *)UTF8String NS_RETURNS_INNER_POINTER;
+- (const char *)cStringUsingEncoding:(NSStringEncoding)aEncoding NS_RETURNS_INNER_POINTER;
 
 @end
 

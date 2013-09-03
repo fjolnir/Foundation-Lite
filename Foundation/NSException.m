@@ -3,6 +3,22 @@
 #import "NSDictionary.h"
 #import <objc/hooks.h>
 
+NSString *NSGenericException = @"NSGenericException";
+NSString *NSRangeException = @"NSRangeException";
+NSString *NSInvalidArgumentException = @"NSInvalidArgumentException";
+NSString *NSInternalInconsistencyException = @"NSInternalInconsistencyException";
+NSString *NSMallocException = @"NSMallocException";
+NSString *NSObjectInaccessibleException = @"NSObjectInaccessibleException";
+NSString *NSObjectNotAvailableException = @"NSObjectNotAvailableException";
+NSString *NSDestinationInvalidException = @"NSDestinationInvalidException";
+NSString *NSPortTimeoutException = @"NSPortTimeoutException";
+NSString *NSInvalidSendPortException = @"NSInvalidSendPortException";
+NSString *NSInvalidReceivePortException = @"NSInvalidReceivePortException";
+NSString *NSPortSendException = @"NSPortSendException";
+NSString *NSPortReceiveException = @"NSPortReceiveException";
+
+
+
 @interface NSException () {
     NSString *_name, *_reason;
     NSDictionary *_userInfo;
@@ -24,6 +40,26 @@ static void _handleUnexpectedException(id aException)
 + (void)initialize
 {
     _objc_unexpected_exception = &_handleUnexpectedException;
+}
+
++ (void)raise:(NSString *)aName format:(NSString *)aFormat, ...
+{
+    va_list argList;
+    @try {
+        va_start(argList, aFormat);
+        [self raise:aName format:aFormat arguments:argList];
+    } @catch(id e) {
+        @throw e;
+    } @finally {
+        va_end(argList);
+    }
+}
+
++ (void)raise:(NSString *)aName format:(NSString *)aFormat arguments:(va_list)aArgList
+{
+    [[self exceptionWithName:aName 
+                      reason:[[NSString alloc] initWithFormat:aFormat arguments:aArgList]
+                    userInfo:nil] raise];
 }
 
 + (NSException *)exceptionWithName:(NSString *)aName

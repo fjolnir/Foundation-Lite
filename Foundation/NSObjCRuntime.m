@@ -47,7 +47,9 @@ void NSLogv(NSString * aFormat, va_list aArgs)
     fprintf(stderr, "%s\n", [[[NSString alloc] initWithFormat:aFormat arguments:aArgs] UTF8String]);
 }
 
-void NSPrintForDebugger(id obj)
+const char *_NSPrintForDebugger(id object)
 {
-    fprintf(stderr, "%s\n", [[obj description] UTF8String]);
+    if([object respondsToSelector:@selector(description)])
+        return [[object description] UTF8String];
+    return NULL;
 }

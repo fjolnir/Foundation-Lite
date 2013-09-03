@@ -1,4 +1,5 @@
 #import "NSString.h"
+#import "NSData.h"
 #import <CoreFoundation/CFString.h>
 #import <dispatch/dispatch.h>
 
@@ -14,14 +15,12 @@ CF_EXPORT CFStringRef  _CFStringCreateWithFormatAndArgumentsAux(CFAllocatorRef a
 @interface NSCFString : NSString {
 @protected
     CFStringRef _cfString;
-    char *_cStringCache;
 }
 @end
 
 @interface NSMutableString () {
 @protected
     CFMutableStringRef _cfString;
-    char *_cStringCache;
 }
 @end
 
@@ -77,30 +76,21 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
     return self;
 }
-- (id)initWithString:(NSString *)aString
-{
-    return [aString copy];
-}
-- (id)initWithFormat:(NSString * const)aFormat, ...
-{
-    va_list argList;
-    va_start(argList, aFormat);
-    self = [self initWithFormat:aFormat arguments:argList];
-    va_end(argList);
-    return self;
-}
-- (id)initWithFormat:(NSString *)aFormat arguments:(va_list)aArgList
-{
-    CFStringRef cfStr = _CFStringCreateWithFormatAndArgumentsAux(NULL, &_NSStringCopyObjectDescription, NULL, [aFormat CFString], aArgList);
-    self = [self initWithCFString:cfStr];
 
-    CFRelease(cfStr);
-    return self;
-}
 //- (id)initWithData:(NSData *)data encoding:(NSStringEncoding)encoding
 //{
 //    return [self initWithCFString:CFStringCreateWith];
 //}
+
+
+- (id)initWithBytesNoCopy:(void *)aBytes length:(NSUInteger)aLen encoding:(NSStringEncoding)aEncoding freeWhenDone:(BOOL)aFree
+{
+    CFStringRef cfStr = CFStringCreateWithBytesNoCopy(NULL, aBytes, aLen, aEncoding, YES, aFree ? kCFAllocatorDefault : kCFAllocatorNull);
+    self = [self initWithCFString:cfStr];
+    CFRelease(cfStr);
+    return self;
+}
+
 - (id)initWithBytes:(const void * const)aBytes length:(NSUInteger const)aLen encoding:(NSStringEncoding const)aEncoding
 {
     CFStringRef cfStr = CFStringCreateWithBytes(NULL, aBytes, aLen, aEncoding, YES);
@@ -119,24 +109,8 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 - (void)dealloc
 {
     CFRelease(_cfString), _cfString = NULL;
-    free(_cStringCache), _cStringCache = NULL;
 
     [super dealloc];
-}
-
-- (const char *)UTF8String
-{
-    if(_cStringCache)
-        return _cStringCache;
-
-    char *utfString = (char *)CFStringGetCStringPtr(_cfString, kCFStringEncodingUTF8);
-    if(!utfString) {
-        CFIndex const bufLen = CFStringGetMaximumSizeForEncoding([self length], kCFStringEncodingUTF8);
-        _cStringCache = malloc(bufLen);
-        CFStringGetCString(_cfString, _cStringCache, bufLen, kCFStringEncodingUTF8);
-        return _cStringCache;
-    }
-    return utfString;
 }
 
 - (id)copy
@@ -194,6 +168,27 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
     return [[[self alloc] initWithCString:aBuf encoding:aEncoding] autorelease];
 }
 
+- (id)initWithString:(NSString *)aString
+{
+    return [self initWithCFString:[aString CFString]];
+}
+- (id)initWithFormat:(NSString * const)aFormat, ...
+{
+    va_list argList;
+    va_start(argList, aFormat);
+    self = [self initWithFormat:aFormat arguments:argList];
+    va_end(argList);
+    return self;
+}
+- (id)initWithFormat:(NSString *)aFormat arguments:(va_list)aArgList
+{
+    CFStringRef cfStr = _CFStringCreateWithFormatAndArgumentsAux(NULL, &_NSStringCopyObjectDescription, NULL, [aFormat CFString], aArgList);
+    self = [self initWithCFString:cfStr];
+
+    CFRelease(cfStr);
+    return self;
+}
+
 - (NSString *)description
 {
     return self;
@@ -201,7 +196,41 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 
 - (const char *)UTF8String
 {
-    return NULL; // Abstract
+    char *utfString = (char *)CFStringGetCStringPtr([self CFString], kCFStringEncodingUTF8);
+    if(!utfString) {
+        CFIndex const bufLen = CFStringGetMaximumSizeForEncoding([self length], kCFStringEncodingUTF8);
+        char *buf = malloc(bufLen);
+        CFStringGetCString([self CFString], buf, bufLen, kCFStringEncodingUTF8);
+        return [[NSData dataWithBytesNoCopy:buf length:bufLen freeWhenDone:YES] bytes];
+    }
+    return utfString;
+}
+
+- (const char *)cStringUsingEncoding:(NSStringEncoding)aEncoding
+{
+    if(aEncoding == NSUTF8StringEncoding)
+        return [self UTF8String];
+    else {
+        CFIndex bufLen = CFStringGetMaximumSizeForEncoding([self length], aEncoding);
+        uint8_t *buf = malloc(bufLen+1);
+        CFStringGetBytes([self CFString], (CFRange){0, [self length]}, aEncoding, '?', false, buf, bufLen, &bufLen);
+        buf[bufLen] = '\0';
+        return [[NSData dataWithBytesNoCopy:buf length:bufLen+1 freeWhenDone:YES] bytes];
+    }
+}
+
+
+- (NSData *)dataUsingEncoding:(NSStringEncoding)aEncoding allowLossyConversion:(BOOL)aLossy
+{
+    CFIndex bufLen = CFStringGetMaximumSizeForEncoding([self length], aEncoding);
+    uint8_t *buf = malloc(bufLen);
+    CFStringGetBytes([self CFString], (CFRange){0, [self length]}, aEncoding,
+                     aLossy ? '?' : 0, false, buf, bufLen, &bufLen);
+    return [NSData dataWithBytesNoCopy:buf length:bufLen freeWhenDone:YES];
+}
+- (NSData *)dataUsingEncoding:(NSStringEncoding)aEncoding
+{
+    return [self dataUsingEncoding:aEncoding allowLossyConversion:NO];
 }
 
 - (NSUInteger)length
@@ -375,6 +404,12 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
 - (id)init
 {
     return [self initWithCapacity:0];
+}
+- (id)initWithCFString:(CFStringRef const)aCFStr
+{
+    if((self = [super init]))
+        _cfString = CFStringCreateMutableCopy(NULL, 0, aCFStr);
+    return self;
 }
 - (id)initWithCapacity:(NSUInteger)aCapacity
 {

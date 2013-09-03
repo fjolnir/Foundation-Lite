@@ -140,6 +140,11 @@
     return [[self alloc] initWithLength:aLength];
 }
 
+- (id)init
+{
+    return [self initWithCapacity:0];
+}
+
 - (id)initWithCapacity:(NSUInteger)aCapacity
 {
     if((self = [super init]))

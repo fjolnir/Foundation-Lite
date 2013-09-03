@@ -3,6 +3,8 @@
 
 NSString * const NSCocoaErrorDomain = @"NSCocoaErrorDomain";
 
+NSString * const NSLocalizedDescriptionKey = @"NSLocalizedDescription";
+
 NSString * const NSPOSIXErrorDomain = @"NSPOSIXErrorDomain";
 NSString * const NSOSStatusErrorDomain = @"NSOSStatusErrorDomain";
 NSString * const NSMachErrorDomain = @"NSMachErrorDomain";

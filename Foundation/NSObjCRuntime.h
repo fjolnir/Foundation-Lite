@@ -263,7 +263,7 @@ FOUNDATION_EXPORT const char *NSGetSizeAndAlignment(const char *typePtr, NSUInte
 FOUNDATION_EXPORT void NSLog(NSString *format, ...) NS_FORMAT_FUNCTION(1,2);
 FOUNDATION_EXPORT void NSLogv(NSString *format, va_list args) NS_FORMAT_FUNCTION(1,0);
 
-FOUNDATION_EXPORT void NSPrintForDebugger(id obj);
+FOUNDATION_EXPORT const char *_NSPrintForDebugger(id object);
 
 typedef NS_ENUM(NSInteger, NSComparisonResult) {NSOrderedAscending = -1L, NSOrderedSame, NSOrderedDescending};
 
