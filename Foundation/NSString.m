@@ -188,6 +188,11 @@ static CFStringRef _NSStringCopyObjectDescription(void * const aObj, const void 
     CFRelease(cfStr);
     return self;
 }
+- (id)initWithData:(NSData *)aData encoding:(NSStringEncoding)aEncoding
+{
+    return [self initWithBytes:[aData bytes] length:[aData length] encoding:aEncoding];
+}
+
 
 - (NSString *)description
 {
