@@ -6,7 +6,7 @@ Foundation lite is a limited subset of Cocoa's Foundation framework, intented fo
 
 It deliberately only implements only the absolute core components of Foundation with the goal of making it feasible to deploy Objective-C on Linux servers. 
 
-Most of the types implemented are simple wrappers around Apple's own CoreFoundation Lite (hence Foundation Lite), meaning that these are no half-assed implementation I whipped up in my spare time, and should have roughly the same performance characteristics as those on MacOS, and will be updated with each release of it.
+Most of the types implemented are simple wrappers around Apple's own CoreFoundation Lite (hence Foundation Lite), meaning that these are no half-assed implementations I whipped up in my spare time, and should have roughly the same performance characteristics as those on MacOS, and will be updated with each release of it.
 
 ## Dependencies:
 
