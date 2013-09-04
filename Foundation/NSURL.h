@@ -23,8 +23,6 @@ FOUNDATION_EXPORT NSString *NSURLFileScheme;
 
 - (id)initWithCFURL:(CFURLRef)aURL;
 
-- (CFURLRef)CFURL;
-
 - (NSString *)absoluteString;
 - (NSString *)relativeString;
 - (NSURL *)baseURL;
@@ -46,6 +44,12 @@ FOUNDATION_EXPORT NSString *NSURLFileScheme;
 - (BOOL)isFileURL;
 
 - (NSURL *)standardizedURL;
+
+@end
+
+@interface NSURL (FoundationLiteExtensionMethods)
+
+- (CFURLRef)CFURL;
 
 @end
 

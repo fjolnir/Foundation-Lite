@@ -44,8 +44,6 @@ typedef NS_OPTIONS(NSUInteger, NSDataSearchOptions) {
 - (id)initWithData:(NSData *)data;
 + (id)dataWithData:(NSData *)data;
 
-- (CFDataRef)CFData;
-
 - (NSUInteger)length;
 - (const void *)bytes NS_RETURNS_INNER_POINTER;
 
@@ -58,6 +56,12 @@ typedef NS_OPTIONS(NSUInteger, NSDataSearchOptions) {
 //- (BOOL)writeToFile:(NSString *)path options:(NSDataWritingOptions)writeOptionsMask error:(NSError **)errorPtr;
 //- (BOOL)writeToURL:(NSURL *)url options:(NSDataWritingOptions)writeOptionsMask error:(NSError **)errorPtr;
 - (NSRange)rangeOfData:(NSData *)dataToFind options:(NSDataSearchOptions)mask range:(NSRange)searchRange;
+
+@end
+
+@interface NSData (FoundationLiteExtensionMethods)
+
+- (CFDataRef)CFData;
 
 @end
 

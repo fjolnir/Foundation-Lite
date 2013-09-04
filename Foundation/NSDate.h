@@ -25,9 +25,6 @@ typedef double NSTimeInterval;
 - (id)initWithTimeIntervalSince1970:(NSTimeInterval)aInterval;
 - (id)initWithTimeInterval:(NSTimeInterval)aSsecsToBeAdded sinceDate:(NSDate *)aDate;
 
-
-- (CFDateRef)CFDate;
-
 - (NSTimeInterval)timeIntervalSinceReferenceDate;
 
 - (NSTimeInterval)timeIntervalSinceDate:(NSDate *)aDate;
@@ -45,4 +42,9 @@ typedef double NSTimeInterval;
 
 @end
 
+@interface NSDate (FoundationLiteExtensionMethods)
+
+- (CFDateRef)CFDate;
+
+@end
 

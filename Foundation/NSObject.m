@@ -3,9 +3,6 @@
 #import "NSString.h"
 #import "NSException.h"
 #import <objc/runtime.h>
-
-// The Apple runtime already implements NSObject
-#ifndef __APPLE__
 #import <objc/hooks.h>
 #import <objc/objc-arc.h>
 
@@ -264,4 +261,3 @@ static struct objc_slot *retrieve_doesNotRecognizeSelector(id aReceiver, SEL aSe
 
 @end
 
-#endif

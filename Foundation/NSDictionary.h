@@ -24,8 +24,6 @@
 //- (id)initWithContentsOfFile:(NSString *)aPath;
 //- (id)initWithContentsOfURL:(NSURL *)aUrl;
 
-- (CFDictionaryRef)CFDictionary;
-
 - (NSUInteger)count;
 - (id)objectForKey:(id)aAKey;
 
@@ -41,6 +39,12 @@
 - (void)getObjects:(id __unsafe_unretained [])aObjects andKeys:(id __unsafe_unretained [])aKeys;
 
 - (id)objectForKeyedSubscript:(id)aKey;
+
+@end
+
+@interface NSDictionary (FoundationLiteExtensionMethods)
+
+- (CFDictionaryRef)CFDictionary;
 
 @end
 

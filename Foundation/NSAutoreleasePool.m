@@ -1,7 +1,4 @@
 #import "NSAutoreleasePool.h"
-
-#ifndef __APPLE__
-
 #import <objc/objc-arc.h>
 
 @interface NSAutoreleasePool () {
@@ -61,6 +58,4 @@
 }
 
 @end
-
-#endif
 

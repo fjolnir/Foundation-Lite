@@ -19,8 +19,6 @@
 - (id)initWithArray:(NSArray *)array;
 - (id)initWithArray:(NSArray *)array copyItems:(BOOL)flag;
 
-- (CFArrayRef)CFArray;
-
 - (NSUInteger)count;
 - (id)objectAtIndex:(NSUInteger)index;
 
@@ -43,6 +41,12 @@
 - (void)makeObjectsPerformSelector:(SEL)aSelector withObject:(id)argument;
 
 - (id)objectAtIndexedSubscript:(NSUInteger)idx;
+
+@end
+
+@interface NSArray (FoundationLiteExtensionMethods)
+
+- (CFArrayRef)CFArray;
 
 @end
 
